@@ -1,0 +1,4 @@
+.virtenv/*
+flagit/*
+*.xlsx
+.env
