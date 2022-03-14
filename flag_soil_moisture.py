@@ -21,8 +21,8 @@ def fetch_soil_data():
 
     # fetch for a single farm code for simplicity (code=jlo)
     #
-    uri = "/onfarm/soil_moisture?output=json&type=tdr&code=bii"
-    # uri = "/onfarm/soil_moisture?output=json&type=tdr&code=bgp"
+    # uri = "/onfarm/soil_moisture?output=json&type=tdr&code=bii"
+    uri = "/onfarm/soil_moisture?output=json&type=tdr&code=bgp"
 
     # request the soil moisture endpoint
     api_connection.request("GET", uri, headers=api_headers)
@@ -94,11 +94,11 @@ def extract_soil_data(soil_data):
         print(row_index, col_index)
 
         df = pd.DataFrame(value)
-        print(df)
+        # print(df)
         df = df.sort_values(by="index")
         df = df.set_index("index")
-        df = df.iloc[::4, :]
-        print(df)
+        # df = df.iloc[::4, :]
+        # print(df)
 
         # date_index = pd.DatetimeIndex(data=value["timestamp"], freq="infer")
         # print(date_index)
