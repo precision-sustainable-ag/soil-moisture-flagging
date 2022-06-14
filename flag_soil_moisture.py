@@ -21,15 +21,17 @@ class SoilFlagger:
         #     'sensor_data') == 1, unfiltered_code_objs))
 
         # self.codes = list(map(lambda x: x.get('code'), code_objs))
-        self.save_as_excel = True
-        self.chart_moisture = False
+        self.save_as_excel = False
+        self.chart_moisture = True
         self.codes = ['bii', 'bgp', 'hvq', 'sos',
                       'pqt', 'rkm', 'sjc', 'tcc', 'hfe', 'alr']
         # self.codes = ['bgp', 'bii']
 
-        # self.iterate_codes()
+        self.iterate_codes()
 
-        self.chart_versions()
+        # self.read_ars_data()
+
+        # self.chart_versions()
 
     def iterate_codes(self):
         for code in self.codes:
@@ -123,7 +125,7 @@ class SoilFlagger:
                 # get vwc, uid, and timestamp and append it to self.data_by_serial_number[<current items serial number>][<vwc/uid/timestamp>]
                 if item.get('vwc'):
                     self.data_by_serial_number[identifier]['soil_moisture'].append(
-                        item.get('vwc'))
+                        float(item.get('vwc')))
                     self.data_by_serial_number[identifier]['soil_temperature'].append(
                         item.get('soil_temp'))
                     self.data_by_serial_number[identifier]['uid'].append(
@@ -134,72 +136,86 @@ class SoilFlagger:
                         item.get('is_vwc_outlier'))
 
     def chart_versions(self):
-        keys = ['bii_18000416 -15_', 'bii_18000416 -45_', 'bii_18000416 -80_', 'bii_18000416 -5_', 'bii_18000429 -15_', 'bii_18000429 -45_', 'bii_18000429 -80_', 'bii_18000429 -5_', 'bii_18000435 -15_', 'bii_18000435 -45_', 'bii_18000435 -80_', 'bii_18000437 -15_', 'bii_18000437 -45_', 'bii_18000437 -80_', 'bgp_18000285 -15_', 'bgp_18000285 -45_', 'bgp_18000285 -80_', 'bgp_18000285 -5_', 'bgp_18000353 -15_', 'bgp_18000353 -45_', 'bgp_18000353 -80_', 'bgp_18000473 -15_', 'bgp_18000473 -45_', 'bgp_18000473 -80_', 'bgp_18000478 -15_', 'bgp_18000478 -45_', 'bgp_18000478 -80_', 'bgp_18000478 -5_', 'hvq_18000314 -15_', 'hvq_18000314 -45_', 'hvq_18000314 -80_', 'hvq_18000508 -15_', 'hvq_18000508 -45_', 'hvq_18000508 -80_', 'hvq_18000526 -15_', 'hvq_18000526 -45_', 'hvq_18000526 -80_', 'hvq_18000526 -5_', 'hvq_18000636 -15_', 'hvq_18000636 -45_', 'hvq_18000636 -80_', 'hvq_18000636 -5_', 'sos_18000539 -15_', 'sos_18000539 -45_', 'sos_18000539 -80_', 'sos_18000539 -5_', 'sos_18000566 -15_', 'sos_18000566 -45_', 'sos_18000566 -80_', 'sos_18000566 -5_', 'sos_18000581 -15_',
-                'sos_18000581 -45_', 'sos_18000581 -80_', 'sos_18000607 -15_', 'sos_18000607 -45_', 'sos_18000607 -80_', 'pqt_18000094 -15_', 'pqt_18000094 -45_', 'pqt_18000094 -80_', 'pqt_18000218 -15_', 'pqt_18000218 -80_', 'pqt_18000218 -5_', 'pqt_18000218 -45_', 'pqt_18000278 -45_', 'pqt_18000278 -80_', 'pqt_18000287 -45_', 'pqt_18000287 -80_', 'pqt_18000287 -5_', 'sjc_nbugmdrs -15_', 'sjc_nbugmdrs -45_', 'sjc_nbugmdrs -80_', 'sjc_ncjdcwcd -15_', 'sjc_ncjdcwcd -45_', 'sjc_ncjdcwcd -80_', 'sjc_ncjdcwcd -5_', 'tcc_nbbikiwe -15_', 'tcc_nbbikiwe -45_', 'tcc_nbbikiwe -80_', 'tcc_ncqmvnmb -15_', 'tcc_ncqmvnmb -45_', 'tcc_ncqmvnmb -80_', 'tcc_ncqmvnmb -5_', 'hfe_nbcvrpxg -15_', 'hfe_nbcvrpxg -45_', 'hfe_nbcvrpxg -80_', 'hfe_nbkrhbcv -15_', 'hfe_nbkrhbcv -45_', 'hfe_nbkrhbcv -80_', 'hfe_ncmrpbkr -15_', 'hfe_ncmrpbkr -45_', 'hfe_ncmrpbkr -80_', 'hfe_ncmrpbkr -5_', 'hfe_ncparuyv -15_', 'hfe_ncparuyv -45_', 'hfe_ncparuyv -80_', 'hfe_ncparuyv -5_', 'alr_nbyuqgxl -15_', 'alr_nbyuqgxl -45_', 'alr_nbyuqgxl -80_', 'alr_nckwkzfs -15_', 'alr_nckwkzfs -45_', 'alr_nckwkzfs -80_', 'alr_nckwkzfs -5_']
+        # keys = ['bii_18000416 -15_', 'bii_18000416 -45_', 'bii_18000416 -80_', 'bii_18000416 -5_', 'bii_18000429 -15_', 'bii_18000429 -45_', 'bii_18000429 -80_', 'bii_18000429 -5_', 'bii_18000435 -15_', 'bii_18000435 -45_', 'bii_18000435 -80_', 'bii_18000437 -15_', 'bii_18000437 -45_', 'bii_18000437 -80_', 'bgp_18000285 -15_', 'bgp_18000285 -45_', 'bgp_18000285 -80_', 'bgp_18000285 -5_', 'bgp_18000353 -15_', 'bgp_18000353 -45_', 'bgp_18000353 -80_', 'bgp_18000473 -15_', 'bgp_18000473 -45_', 'bgp_18000473 -80_', 'bgp_18000478 -15_', 'bgp_18000478 -45_', 'bgp_18000478 -80_', 'bgp_18000478 -5_', 'hvq_18000314 -15_', 'hvq_18000314 -45_', 'hvq_18000314 -80_', 'hvq_18000508 -15_', 'hvq_18000508 -45_', 'hvq_18000508 -80_', 'hvq_18000526 -15_', 'hvq_18000526 -45_', 'hvq_18000526 -80_', 'hvq_18000526 -5_', 'hvq_18000636 -15_', 'hvq_18000636 -45_', 'hvq_18000636 -80_', 'hvq_18000636 -5_', 'sos_18000539 -15_', 'sos_18000539 -45_', 'sos_18000539 -80_', 'sos_18000539 -5_', 'sos_18000566 -15_', 'sos_18000566 -45_', 'sos_18000566 -80_', 'sos_18000566 -5_', 'sos_18000581 -15_',
+        #         'sos_18000581 -45_', 'sos_18000581 -80_', 'sos_18000607 -15_', 'sos_18000607 -45_', 'sos_18000607 -80_', 'pqt_18000094 -15_', 'pqt_18000094 -45_', 'pqt_18000094 -80_', 'pqt_18000218 -15_', 'pqt_18000218 -80_', 'pqt_18000218 -5_', 'pqt_18000218 -45_', 'pqt_18000278 -45_', 'pqt_18000278 -80_', 'pqt_18000287 -45_', 'pqt_18000287 -80_', 'pqt_18000287 -5_', 'sjc_nbugmdrs -15_', 'sjc_nbugmdrs -45_', 'sjc_nbugmdrs -80_', 'sjc_ncjdcwcd -15_', 'sjc_ncjdcwcd -45_', 'sjc_ncjdcwcd -80_', 'sjc_ncjdcwcd -5_', 'tcc_nbbikiwe -15_', 'tcc_nbbikiwe -45_', 'tcc_nbbikiwe -80_', 'tcc_ncqmvnmb -15_', 'tcc_ncqmvnmb -45_', 'tcc_ncqmvnmb -80_', 'tcc_ncqmvnmb -5_', 'hfe_nbcvrpxg -15_', 'hfe_nbcvrpxg -45_', 'hfe_nbcvrpxg -80_', 'hfe_nbkrhbcv -15_', 'hfe_nbkrhbcv -45_', 'hfe_nbkrhbcv -80_', 'hfe_ncmrpbkr -15_', 'hfe_ncmrpbkr -45_', 'hfe_ncmrpbkr -80_', 'hfe_ncmrpbkr -5_', 'hfe_ncparuyv -15_', 'hfe_ncparuyv -45_', 'hfe_ncparuyv -80_', 'hfe_ncparuyv -5_', 'alr_nbyuqgxl -15_', 'alr_nbyuqgxl -45_', 'alr_nbyuqgxl -80_', 'alr_nckwkzfs -15_', 'alr_nckwkzfs -45_', 'alr_nckwkzfs -80_', 'alr_nckwkzfs -5_']
+
+        keys = ['490_-0', '491_-0', '492_-0', '493_-0', '494_-10', '495_-10', '496_-20', '497_-20', '498_-30', '499_-30', '500_-0', '501_-0', '502_-0', '503_-0', '504_-10', '505_-10', '506_-20', '507_-20', '508_-30', '509_-30',
+                '510_-0', '511_-0', '512_-0', '513_-0', '514_-10', '515_-10', '516_-20', '517_-20', '518_-30', '519_-30', '520_-0', '521_-0', '522_-0', '523_-0', '524_-10', '525_-10', '526_-20', '527_-20', '528_-30', '529_-30']
 
         for key in keys:
             # for i in range(0, 13):
             fig, axs = plt.subplots(5, 1)
 
             old_df = pd.read_excel(
-                '{}0.5_above_95_percent.xlsx'.format(key))
+                '{}_ars_new_window_.0.05.xlsx'.format(key))
             # old_filtered_df = old_df.loc[old_df['qflag'] != "{'G'}"]
             old_other = old_df.loc[(old_df['qflag'] != "{'D06'}") & (old_df['qflag'] != "{'D07'}") & (old_df['qflag'] != "{'D08'}") & (
-                old_df['qflag'] != "{'D09'}") & (old_df['qflag'] != "{'D10'}") & (old_df['qflag'] != "{'G'}")]
+                old_df['qflag'] != "{'D09'}") & (old_df['qflag'] != "{'D10'}") & (old_df['qflag'] != "{'D11'}") & (old_df['qflag'] != "{'G'}")]
 
             old_d06 = old_df.loc[old_df['qflag'] == "{'D06'}"]
             old_d07 = old_df.loc[old_df['qflag'] == "{'D07'}"]
             old_d08 = old_df.loc[old_df['qflag'] == "{'D08'}"]
             old_d09 = old_df.loc[old_df['qflag'] == "{'D09'}"]
             old_d10 = old_df.loc[old_df['qflag'] == "{'D10'}"]
+            old_d11 = old_df.loc[old_df['qflag'] == "{'D11'}"]
 
             lower_df = pd.read_excel(
-                '{}0.005.xlsx'.format(key))
+                '{}_ars_new_window_.0.005.xlsx'.format(key))
             # old_filtered_df = lower_df.loc[lower_df['qflag'] != "{'G'}"]
             lower_other = lower_df.loc[(lower_df['qflag'] != "{'D06'}") & (lower_df['qflag'] != "{'D07'}") & (lower_df['qflag'] != "{'D08'}") & (
-                lower_df['qflag'] != "{'D09'}") & (lower_df['qflag'] != "{'D10'}") & (lower_df['qflag'] != "{'G'}")]
+                lower_df['qflag'] != "{'D09'}") & (lower_df['qflag'] != "{'D10'}") & (lower_df['qflag'] != "{'D11'}") & (lower_df['qflag'] != "{'G'}")]
 
             lower_d06 = lower_df.loc[lower_df['qflag'] == "{'D06'}"]
             lower_d07 = lower_df.loc[lower_df['qflag'] == "{'D07'}"]
             lower_d08 = lower_df.loc[lower_df['qflag'] == "{'D08'}"]
             lower_d09 = lower_df.loc[lower_df['qflag'] == "{'D09'}"]
             lower_d10 = lower_df.loc[lower_df['qflag'] == "{'D10'}"]
+            lower_d11 = lower_df.loc[lower_df['qflag'] == "{'D11'}"]
 
             new_df = pd.read_excel(
-                '{}0.05.xlsx'.format(key))
+                '{}_ars_new_window_.0.001.xlsx'.format(key))
             # new_filtered_df = new_df.loc[new_df['qflag'] != "{'G'}"]
             new_other = new_df.loc[(new_df['qflag'] != "{'D06'}") & (new_df['qflag'] != "{'D07'}") & (new_df['qflag'] != "{'D08'}") & (
-                new_df['qflag'] != "{'D09'}") & (new_df['qflag'] != "{'D10'}") & (new_df['qflag'] != "{'G'}")]
+                new_df['qflag'] != "{'D09'}") & (new_df['qflag'] != "{'D10'}") & (new_df['qflag'] != "{'D11'}") & (new_df['qflag'] != "{'G'}")]
 
             new_d06 = new_df.loc[new_df['qflag'] == "{'D06'}"]
             new_d07 = new_df.loc[new_df['qflag'] == "{'D07'}"]
             new_d08 = new_df.loc[new_df['qflag'] == "{'D08'}"]
             new_d09 = new_df.loc[new_df['qflag'] == "{'D09'}"]
             new_d10 = new_df.loc[new_df['qflag'] == "{'D10'}"]
+            new_d11 = new_df.loc[new_df['qflag'] == "{'D11'}"]
 
             newest_df = pd.read_excel(
-                '{}0.275.xlsx'.format(key))
+                '{}_ars_new_window_.0005.xlsx'.format(key))
             # new_filtered_df = new_df.loc[new_df['qflag'] != "{'G'}"]
             newest_other = newest_df.loc[(newest_df['qflag'] != "{'D06'}") & (newest_df['qflag'] != "{'D07'}") & (newest_df['qflag'] != "{'D08'}") & (
-                newest_df['qflag'] != "{'D09'}") & (newest_df['qflag'] != "{'D10'}") & (newest_df['qflag'] != "{'G'}")]
+                newest_df['qflag'] != "{'D09'}") & (newest_df['qflag'] != "{'D10'}") & (newest_df['qflag'] != "{'D11'}") & (newest_df['qflag'] != "{'G'}")]
 
             newest_d06 = newest_df.loc[newest_df['qflag'] == "{'D06'}"]
             newest_d07 = newest_df.loc[newest_df['qflag'] == "{'D07'}"]
             newest_d08 = newest_df.loc[newest_df['qflag'] == "{'D08'}"]
             newest_d09 = newest_df.loc[newest_df['qflag'] == "{'D09'}"]
             newest_d10 = newest_df.loc[newest_df['qflag'] == "{'D10'}"]
+            newest_d11 = newest_df.loc[newest_df['qflag'] == "{'D11'}"]
 
             newest_point_5_df = pd.read_excel(
-                '{}0.275.xlsx'.format(key))
+                '{}_ars_new_window_.0001.xlsx'.format(key))
             # new_filtered_df = new_df.loc[new_df['qflag'] != "{'G'}"]
-            newest_point_5_other = newest_df.loc[(newest_df['qflag'] != "{'D06'}") & (newest_df['qflag'] != "{'D07'}") & (newest_df['qflag'] != "{'D08'}") & (
-                newest_df['qflag'] != "{'D09'}") & (newest_df['qflag'] != "{'D10'}") & (newest_df['qflag'] != "{'G'}")]
+            newest_point_5_other = newest_point_5_df.loc[(newest_point_5_df['qflag'] != "{'D06'}") & (newest_point_5_df['qflag'] != "{'D07'}") & (newest_point_5_df['qflag'] != "{'D08'}") & (
+                newest_point_5_df['qflag'] != "{'D09'}") & (newest_point_5_df['qflag'] != "{'D10'}") & (newest_point_5_df['qflag'] != "{'D11'}") & (newest_point_5_df['qflag'] != "{'G'}")]
 
-            newest_point_5_d06 = newest_df.loc[newest_df['qflag'] == "{'D06'}"]
-            newest_point_5_d07 = newest_df.loc[newest_df['qflag'] == "{'D07'}"]
-            newest_point_5_d08 = newest_df.loc[newest_df['qflag'] == "{'D08'}"]
-            newest_point_5_d09 = newest_df.loc[newest_df['qflag'] == "{'D09'}"]
-            newest_point_5_d10 = newest_df.loc[newest_df['qflag'] == "{'D10'}"]
+            newest_point_5_d06 = newest_point_5_df.loc[newest_point_5_df['qflag']
+                                                       == "{'D06'}"]
+            newest_point_5_d07 = newest_point_5_df.loc[newest_point_5_df['qflag']
+                                                       == "{'D07'}"]
+            newest_point_5_d08 = newest_point_5_df.loc[newest_point_5_df['qflag']
+                                                       == "{'D08'}"]
+            newest_point_5_d09 = newest_point_5_df.loc[newest_point_5_df['qflag']
+                                                       == "{'D09'}"]
+            newest_point_5_d10 = newest_point_5_df.loc[newest_point_5_df['qflag']
+                                                       == "{'D10'}"]
+            newest_point_5_d11 = newest_point_5_df.loc[newest_point_5_df['qflag']
+                                                       == "{'D11'}"]
 
             # new_windows_df = pd.read_excel(
             #     '{}_hourly_new_coeffs_{}.xlsx'.format(code, i))
@@ -274,11 +290,13 @@ class SoilFlagger:
                            old_d09['soil_moisture'].values, color='orange')
             axs[0].scatter(old_d10['timestamp'].values,
                            old_d10['soil_moisture'].values, color='black')
+            axs[0].scatter(old_d11['timestamp'].values,
+                           old_d11['soil_moisture'].values, color='gray')
             axs[0].scatter(old_other['timestamp'].values,
                            old_other['soil_moisture'].values, color='brown')
 
             axs[0].set_title(
-                key + ' var <= 0.5 and moisture >= 95%% of max')
+                key + ' var <= 0.05')
 
             axs[1].scatter(lower_df['timestamp'].values,
                            lower_df['soil_moisture'].values, color='blue')
@@ -294,6 +312,8 @@ class SoilFlagger:
                            lower_d09['soil_moisture'].values, color='orange')
             axs[1].scatter(lower_d10['timestamp'].values,
                            lower_d10['soil_moisture'].values, color='black')
+            axs[1].scatter(lower_d11['timestamp'].values,
+                           lower_d11['soil_moisture'].values, color='gray')
             axs[1].scatter(lower_other['timestamp'].values,
                            lower_other['soil_moisture'].values, color='brown')
 
@@ -314,10 +334,12 @@ class SoilFlagger:
                            new_d09['soil_moisture'].values, color='orange')
             axs[2].scatter(new_d10['timestamp'].values,
                            new_d10['soil_moisture'].values, color='black')
+            axs[2].scatter(new_d11['timestamp'].values,
+                           new_d11['soil_moisture'].values, color='gray')
             axs[2].scatter(new_other['timestamp'].values,
                            new_other['soil_moisture'].values, color='brown')
             axs[2].set_title(
-                key + ' var <= 0.05')
+                key + ' var <= 0.001')
 
             axs[3].scatter(newest_df['timestamp'].values,
                            newest_df['soil_moisture'].values, color='blue')
@@ -333,10 +355,12 @@ class SoilFlagger:
                            newest_d09['soil_moisture'].values, color='orange')
             axs[3].scatter(newest_d10['timestamp'].values,
                            newest_d10['soil_moisture'].values, color='black')
+            axs[3].scatter(newest_d11['timestamp'].values,
+                           newest_d11['soil_moisture'].values, color='gray')
             axs[3].scatter(newest_other['timestamp'].values,
                            newest_other['soil_moisture'].values, color='brown')
             axs[3].set_title(
-                key + ' var <= 0.275')
+                key + ' var <= 0.0005')
 
             axs[4].scatter(newest_point_5_df['timestamp'].values,
                            newest_point_5_df['soil_moisture'].values, color='blue')
@@ -352,10 +376,12 @@ class SoilFlagger:
                            newest_point_5_d09['soil_moisture'].values, color='orange')
             axs[4].scatter(newest_point_5_d10['timestamp'].values,
                            newest_point_5_d10['soil_moisture'].values, color='black')
+            axs[4].scatter(newest_point_5_d11['timestamp'].values,
+                           newest_point_5_d11['soil_moisture'].values, color='gray')
             axs[4].scatter(newest_point_5_other['timestamp'].values,
                            newest_point_5_other['soil_moisture'].values, color='brown')
             axs[4].set_title(
-                key + ' 0.5')
+                key + ' var <= 0.0001')
 
             # axs[3].scatter(new_windows_df['timestamp'].values,
             #                new_windows_df['soil_moisture'].values, color='blue')
@@ -427,6 +453,103 @@ class SoilFlagger:
 
             plt.show()
 
+    def read_ars_data(self):
+        ars_data = pd.read_excel(
+            r'C:\Users\mspinega\Documents\repos\test\soil-moisture\ars_data\2020 CCSP Rep4 Sample Data More Decimals.xlsx')
+
+        dfs = dict(tuple(ars_data.groupby('uid')))
+
+        self.data_by_serial_number = dfs
+
+        print(dfs)
+
+        self.chart_ars_soil_data()
+
+    def chart_ars_soil_data(self):
+        index = 0
+
+        key_list = []
+        # for each key and value in self.data_by_serial_number create a new dataframe and process it
+        for key, value in self.data_by_serial_number.items():
+            # create dataframe from the current value (one serial number)
+            # print(len(value))
+            if self.chart_moisture:
+                fig, axs = plt.subplots(1, 1)
+
+            df = pd.DataFrame(value)
+            df = df.dropna()
+            df['soil_moisture'] = 100 * df['soil_moisture']
+            print(df)
+            if df.empty:
+                continue
+            # print(df)
+            df = df.sort_values(by='index')
+            df = df.set_index('index')
+
+            try:
+                df['timestamp'] = pd.to_datetime(df.index)
+            except Exception:
+                print('hello')
+                print(df)
+
+            depth = df['depth'].iloc[0]
+
+            interface = flagit.Interface(
+                df, depth=depth, frequency=0.25)
+            new_df = interface.run()
+
+            if self.chart_moisture:
+                other = new_df.loc[(new_df['qflag'] != {'D06'}) & (new_df['qflag'] != {'D07'}) & (new_df['qflag'] != {
+                    'D08'}) & (new_df['qflag'] != {'D09'}) & (new_df['qflag'] != {'D10'}) & (new_df['qflag'] != {'D11'}) & (new_df['qflag'] != {'G'})]
+
+                d06 = new_df.loc[new_df['qflag'] == {'D06'}]
+                d07 = new_df.loc[new_df['qflag'] == {'D07'}]
+                d08 = new_df.loc[new_df['qflag'] == {'D08'}]
+                d09 = new_df.loc[new_df['qflag'] == {'D09'}]
+                d10 = new_df.loc[new_df['qflag'] == {'D10'}]
+                d11 = new_df.loc[new_df['qflag'] == {'D11'}]
+
+            if '{}_-{}'.format(str(key), str(depth)) not in key_list:
+                key_list.append('{}_-{}'.format(str(key), str(depth)))
+
+            if self.save_as_excel:
+                new_df.to_excel('{}_-{}_ars_new_window_.0.05.xlsx'.format(
+                    str(key), str(depth)))
+
+            if self.chart_moisture:
+                percentage_flagged = round(new_df.loc[new_df['qflag'] != {
+                    'G'}, 'qflag'].count() / new_df['qflag'].count() * 100, 3)
+                print(percentage_flagged)
+
+                axs.scatter(new_df['timestamp'].values,
+                            new_df['soil_moisture'].values, color='blue')
+
+                axs.scatter(d06['timestamp'].values,
+                            d06['soil_moisture'].values, color='red')
+                axs.scatter(d07['timestamp'].values,
+                            d07['soil_moisture'].values, color='green')
+                axs.scatter(d08['timestamp'].values,
+                            d08['soil_moisture'].values, color='yellow')
+                axs.scatter(d09['timestamp'].values,
+                            d09['soil_moisture'].values, color='orange')
+                axs.scatter(d10['timestamp'].values,
+                            d10['soil_moisture'].values, color='black')
+                axs.scatter(d11['timestamp'].values,
+                            d11['soil_moisture'].values, color='gray')
+                axs.scatter(other['timestamp'].values,
+                            other['soil_moisture'].values, color='brown')
+
+                axs.set_title(str(key) + ' flagit' +
+                              ' %flag ' + str(percentage_flagged))
+
+                # increase timestamp
+                index += 1
+                # col_index += 1
+
+                plt.show()
+        # plt.show()
+        print(key_list)
+
     def chart_soil_data(self):
         # used to distinguish excel files
         index = 0
@@ -490,19 +613,22 @@ class SoilFlagger:
 
             interface = flagit.Interface(
                 df, depth=float(key.split(' ')[1]), frequency=0.25)
+            # interface = flagit.Interface(
+            #     df, depth=df['depth'].iloc(0), frequency=0.25)
             new_df = interface.run()
 
             # new_filtered_df = new_df.loc[new_df['qflag'].str.contains(
             # "G", case = False)]
             if self.chart_moisture:
                 other = new_df.loc[(new_df['qflag'] != {'D06'}) & (new_df['qflag'] != {'D07'}) & (new_df['qflag'] != {
-                    'D08'}) & (new_df['qflag'] != {'D09'}) & (new_df['qflag'] != {'D10'}) & (new_df['qflag'] != {'G'})]
+                    'D08'}) & (new_df['qflag'] != {'D09'}) & (new_df['qflag'] != {'D10'}) & (new_df['qflag'] != {'D11'}) & (new_df['qflag'] != {'G'})]
 
                 d06 = new_df.loc[new_df['qflag'] == {'D06'}]
                 d07 = new_df.loc[new_df['qflag'] == {'D07'}]
                 d08 = new_df.loc[new_df['qflag'] == {'D08'}]
-                d09 = new_df.loc[new_df['qflag'] == {'D09'}]
-                d10 = new_df.loc[new_df['qflag'] == {'D10'}]
+                # d09 = new_df.loc[new_df['qflag'] == {'D09'}]
+                # d10 = new_df.loc[new_df['qflag'] == {'D10'}]
+                d11 = new_df.loc[new_df['qflag'] == {'D11'}]
 
             # print(new_df['qflag'].str)
 
@@ -569,10 +695,12 @@ class SoilFlagger:
                                d07['soil_moisture'].values, color='green')
                 axs[1].scatter(d08['timestamp'].values,
                                d08['soil_moisture'].values, color='yellow')
-                axs[1].scatter(d09['timestamp'].values,
-                               d09['soil_moisture'].values, color='orange')
-                axs[1].scatter(d10['timestamp'].values,
-                               d10['soil_moisture'].values, color='black')
+                # axs[1].scatter(d09['timestamp'].values,
+                #                d09['soil_moisture'].values, color='orange')
+                # axs[1].scatter(d10['timestamp'].values,
+                #                d10['soil_moisture'].values, color='black')
+                axs[1].scatter(d11['timestamp'].values,
+                               d11['soil_moisture'].values, color='gray')
                 axs[1].scatter(other['timestamp'].values,
                                other['soil_moisture'].values, color='brown')
 
