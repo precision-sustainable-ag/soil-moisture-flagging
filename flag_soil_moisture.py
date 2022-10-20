@@ -21,15 +21,17 @@ class SoilFlagger:
         #     'sensor_data') == 1, unfiltered_code_objs))
 
         # self.codes = list(map(lambda x: x.get('code'), code_objs))
-        self.save_as_excel = False
+        self.save_as_excel = True
         self.chart_moisture = True
         self.codes = ['bii', 'bgp', 'hvq', 'sos',
                       'pqt', 'rkm', 'sjc', 'tcc', 'hfe', 'alr']
+        # self.codes = ['hfe', 'alr']
         # self.codes = ['bgp', 'bii']
 
-        self.iterate_codes()
+        # self.iterate_codes()
 
-        # self.read_ars_data()
+        for i in range(2, 3):
+            self.read_ars_data(i)
 
         # self.chart_versions()
 
@@ -453,9 +455,16 @@ class SoilFlagger:
 
             plt.show()
 
-    def read_ars_data(self):
-        ars_data = pd.read_excel(
-            r'C:\Users\mspinega\Documents\repos\test\soil-moisture\ars_data\2020 CCSP Rep4 Sample Data More Decimals.xlsx')
+    def read_ars_data(self, version):
+        if version == 2:
+            ars_data = pd.read_excel(
+                r'C:\Users\mspinega\Documents\repos\test\soil-moisture\ars_data\2020 CCSP Rep4 Sample Data More Decimals.xlsx')
+        elif version == 1:
+            ars_data = pd.read_excel(
+                r'C:\Users\mspinega\Documents\repos\test\soil-moisture\ars_data\2017 R4S1 10in.xlsx')
+        else:
+            ars_data = pd.read_excel(
+                r'C:\Users\mspinega\Documents\repos\test\soil-moisture\ars_data\2019 R3S2 10 in.xlsx')
 
         dfs = dict(tuple(ars_data.groupby('uid')))
 
@@ -474,7 +483,8 @@ class SoilFlagger:
             # create dataframe from the current value (one serial number)
             # print(len(value))
             if self.chart_moisture:
-                fig, axs = plt.subplots(1, 1)
+                # fig, axs = plt.subplots(1, 1)
+                fig, axs = plt.subplots(1, 2)
 
             df = pd.DataFrame(value)
             df = df.dropna()
@@ -521,26 +531,30 @@ class SoilFlagger:
                     'G'}, 'qflag'].count() / new_df['qflag'].count() * 100, 3)
                 print(percentage_flagged)
 
-                axs.scatter(new_df['timestamp'].values,
-                            new_df['soil_moisture'].values, color='blue')
+                axs[1].scatter(new_df['timestamp'].values,
+                               new_df['soil_moisture'].values, color='blue')
 
-                axs.scatter(d06['timestamp'].values,
-                            d06['soil_moisture'].values, color='red')
-                axs.scatter(d07['timestamp'].values,
-                            d07['soil_moisture'].values, color='green')
-                axs.scatter(d08['timestamp'].values,
-                            d08['soil_moisture'].values, color='yellow')
-                axs.scatter(d09['timestamp'].values,
-                            d09['soil_moisture'].values, color='orange')
-                axs.scatter(d10['timestamp'].values,
-                            d10['soil_moisture'].values, color='black')
-                axs.scatter(d11['timestamp'].values,
-                            d11['soil_moisture'].values, color='gray')
-                axs.scatter(other['timestamp'].values,
-                            other['soil_moisture'].values, color='brown')
+                axs[1].scatter(d06['timestamp'].values,
+                               d06['soil_moisture'].values, color='red')
+                axs[1].scatter(d07['timestamp'].values,
+                               d07['soil_moisture'].values, color='green')
+                axs[1].scatter(d08['timestamp'].values,
+                               d08['soil_moisture'].values, color='yellow')
+                axs[1].scatter(d09['timestamp'].values,
+                               d09['soil_moisture'].values, color='orange')
+                axs[1].scatter(d10['timestamp'].values,
+                               d10['soil_moisture'].values, color='black')
+                axs[1].scatter(d11['timestamp'].values,
+                               d11['soil_moisture'].values, color='gray')
+                axs[1].scatter(other['timestamp'].values,
+                               other['soil_moisture'].values, color='brown')
 
-                axs.set_title(str(key) + ' flagit' +
-                              ' %flag ' + str(percentage_flagged))
+                axs[1].set_title(str(key) + ' flagit' +
+                                 ' %flag ' + str(percentage_flagged))
+
+                axs[0].scatter(new_df['timestamp'].values,
+                               new_df['precipitation'].values, color='blue')
+                axs[0].set_title(str(key) + ' precipitation events')
 
                 # increase timestamp
                 index += 1

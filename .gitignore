@@ -1,4 +1,6 @@
 .virtenv/*
 flagit/*
 *.xlsx
+*.csv
 .env
+/data/*
