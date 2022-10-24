@@ -4,3 +4,4 @@ flagit/*
 *.csv
 .env
 /data/*
+*.png

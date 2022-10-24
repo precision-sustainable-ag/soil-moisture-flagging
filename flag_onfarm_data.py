@@ -18,7 +18,31 @@ class SoilFlagger:
         self.chart_moisture = True
         self.codes = pd.read_csv("possibly_shepherded_sites.csv")
 
-        self.statistics_data = {
+        self.statistics_data_cara = {
+            "code": [],
+            "subplot": [],
+            "treatment": [],
+            "depth": [],
+            "percent_both_good": [],
+            "percent_flagit_bad": [],
+            "percent_human_bad": [],
+            "percent_both_bad": [],
+            "number_of_samples": [],
+        }
+
+        self.statistics_data_aurelie = {
+            "code": [],
+            "subplot": [],
+            "treatment": [],
+            "depth": [],
+            "percent_both_good": [],
+            "percent_flagit_bad": [],
+            "percent_human_bad": [],
+            "percent_both_bad": [],
+            "number_of_samples": [],
+        }
+
+        self.statistics_data_both = {
             "code": [],
             "subplot": [],
             "treatment": [],
@@ -50,9 +74,9 @@ class SoilFlagger:
             # # call extract_soil_data() with the data previously fetched
             data_by_field = self.extract_soil_data(soil_data)
 
-            flagit_df_15, flagit_df_45, flagit_df_80 = self.run_flagit(data_by_field)
+            flagit_df_5, flagit_df_15, flagit_df_45, flagit_df_80 = self.run_flagit(data_by_field)
 
-            self.calculate_statistics([flagit_df_15, flagit_df_45, flagit_df_80], self.code, self.subplot, self.treatment)
+            self.calculate_statistics([flagit_df_5, flagit_df_15, flagit_df_45, flagit_df_80], self.code, self.subplot, self.treatment)
 
             print(self.total_points)
 
@@ -74,7 +98,7 @@ class SoilFlagger:
         api_res = api_connection.getresponse()
         api_data = api_res.read()
 
-        print(api_data)
+        # print(api_data)
 
         # convert to json
         json_api_data = api_data.decode('utf8')
@@ -99,6 +123,7 @@ class SoilFlagger:
 
         # iterate each row returned by the api
         for item in soil_data:
+            print(item)
             if item.get('node_serial_no') and item.get('center_depth'):
                 # get vwc, uid, and timestamp and append it to data_by_field[<current items serial number>][<vwc/uid/timestamp>]
                 if item.get('vwc'):
@@ -138,9 +163,15 @@ class SoilFlagger:
             print('hello')
             print(df)
 
+        flagit_df_5 = df[df['center_depth'] == -5]
         flagit_df_15 = df[df['center_depth'] == -15]
         flagit_df_45 = df[df['center_depth'] == -45]
         flagit_df_80 = df[df['center_depth'] == -80]
+
+        if not flagit_df_5.empty:
+            interface_5 = flagit.Interface(
+                flagit_df_5, frequency=0.25)
+            flagit_df_5 = interface_5.run()
 
         if not flagit_df_15.empty:
             interface_15 = flagit.Interface(
@@ -161,7 +192,7 @@ class SoilFlagger:
         # print(flagit_df_45)
         # print(flagit_df_80)
 
-        return flagit_df_15, flagit_df_45, flagit_df_80
+        return flagit_df_5, flagit_df_15, flagit_df_45, flagit_df_80
 
     def calculate_statistics(self, flagit_dfs, code, subplot, treatment):
         # self.statistics_data = {
@@ -176,30 +207,63 @@ class SoilFlagger:
         # }
 
         depth_dict = {
-            0: "-15",
-            1: "-45",
-            2: "-80",
+            0: "-5",
+            1: "-15",
+            2: "-45",
+            3: "-80",
         }
 
         i = 0
         while i < len(flagit_dfs):
-            if flagit_dfs[i].empty:
+            current_df = flagit_dfs[i]
+            if current_df.empty or current_df[(current_df['is_vwc_outlier'] == True)].empty:
                 i += 1
                 continue
-            self.total_points += len(flagit_dfs[i])
-            self.statistics_data["code"].append(code)
-            self.statistics_data["subplot"].append(subplot)
-            self.statistics_data["treatment"].append(treatment)
-            self.statistics_data["depth"].append(depth_dict[i])
-            self.statistics_data["percent_both_good"].append(len(flagit_dfs[i][(flagit_dfs[i]['is_vwc_outlier'] == False) & (flagit_dfs[i]['qflag'] == {'G'})]) / len(flagit_dfs[i]))
-            self.statistics_data["percent_flagit_bad"].append(len(flagit_dfs[i][(flagit_dfs[i]['is_vwc_outlier'] == False) & (flagit_dfs[i]['qflag'] != {'G'})]) / len(flagit_dfs[i]))
-            self.statistics_data["percent_human_bad"].append(len(flagit_dfs[i][(flagit_dfs[i]['is_vwc_outlier'] == True) & (flagit_dfs[i]['qflag'] == {'G'})]) / len(flagit_dfs[i]))
-            self.statistics_data["percent_both_bad"].append(len(flagit_dfs[i][(flagit_dfs[i]['is_vwc_outlier'] == True) & (flagit_dfs[i]['qflag'] != {'G'})]) / len(flagit_dfs[i]))
-            self.statistics_data["number_of_samples"].append(len(flagit_dfs[i]))
-            # percent_both_good = len(flagit_dfs[i][(flagit_dfs[i]['is_vwc_outlier'] == False) & (flagit_dfs[i]['qflag'] == {'G'})]) / len(flagit_dfs[i])
-            # percent_flagit_bad = len(flagit_dfs[i][(flagit_dfs[i]['is_vwc_outlier'] == False) & (flagit_dfs[i]['qflag'] != {'G'})]) / len(flagit_dfs[i])
-            # percent_human_bad = len(flagit_dfs[i][(flagit_dfs[i]['is_vwc_outlier'] == True) & (flagit_dfs[i]['qflag'] == {'G'})]) / len(flagit_dfs[i])
-            # percent_both_bad = len(flagit_dfs[i][(flagit_dfs[i]['is_vwc_outlier'] == True) & (flagit_dfs[i]['qflag'] != {'G'})]) / len(flagit_dfs[i])
+            self.total_points += len(current_df)
+
+            # print("new df")
+            # print(current_df[(current_df['is_vwc_outlier'] == True)])
+            # print(current_df[current_df['vwc_outlier_who_decided'].str.contains("Cara")])
+            # print(current_df[current_df['vwc_outlier_who_decided'].str.contains("Aurelie")])
+            # print(current_df, current_df[(current_df['is_vwc_outlier'] == True)], current_df[(current_df['vwc_outlier_who_decided'] == 'Cara')], current_df[(current_df['vwc_outlier_who_decided'] == 'Aurelie')])
+
+            if (not current_df[(current_df['vwc_outlier_who_decided'] == 'Cara')].empty) and (not current_df[(current_df['vwc_outlier_who_decided'] == 'Aurelie')].empty):
+                self.statistics_data_both["code"].append(code)
+                self.statistics_data_both["subplot"].append(subplot)
+                self.statistics_data_both["treatment"].append(treatment)
+                self.statistics_data_both["depth"].append(depth_dict[i])
+                self.statistics_data_both["percent_both_good"].append(len(current_df[(current_df['is_vwc_outlier'] == False) & (current_df['qflag'] == {'G'})]) / len(current_df))
+                self.statistics_data_both["percent_flagit_bad"].append(len(current_df[(current_df['is_vwc_outlier'] == False) & (current_df['qflag'] != {'G'})]) / len(current_df))
+                self.statistics_data_both["percent_human_bad"].append(len(current_df[(current_df['is_vwc_outlier'] == True) & (current_df['qflag'] == {'G'})]) / len(current_df))
+                self.statistics_data_both["percent_both_bad"].append(len(current_df[(current_df['is_vwc_outlier'] == True) & (current_df['qflag'] != {'G'})]) / len(current_df))
+                self.statistics_data_both["number_of_samples"].append(len(current_df))
+            elif not current_df[(current_df['vwc_outlier_who_decided'] == 'Cara')].empty:
+                self.statistics_data_cara["code"].append(code)
+                self.statistics_data_cara["subplot"].append(subplot)
+                self.statistics_data_cara["treatment"].append(treatment)
+                self.statistics_data_cara["depth"].append(depth_dict[i])
+                self.statistics_data_cara["percent_both_good"].append(len(current_df[(current_df['is_vwc_outlier'] == False) & (current_df['qflag'] == {'G'})]) / len(current_df))
+                self.statistics_data_cara["percent_flagit_bad"].append(len(current_df[(current_df['is_vwc_outlier'] == False) & (current_df['qflag'] != {'G'})]) / len(current_df))
+                self.statistics_data_cara["percent_human_bad"].append(len(current_df[(current_df['is_vwc_outlier'] == True) & (current_df['qflag'] == {'G'})]) / len(current_df))
+                self.statistics_data_cara["percent_both_bad"].append(len(current_df[(current_df['is_vwc_outlier'] == True) & (current_df['qflag'] != {'G'})]) / len(current_df))
+                self.statistics_data_cara["number_of_samples"].append(len(current_df))
+            elif not current_df[(current_df['vwc_outlier_who_decided'] == 'Aurelie')].empty:
+                self.statistics_data_aurelie["code"].append(code)
+                self.statistics_data_aurelie["subplot"].append(subplot)
+                self.statistics_data_aurelie["treatment"].append(treatment)
+                self.statistics_data_aurelie["depth"].append(depth_dict[i])
+                self.statistics_data_aurelie["percent_both_good"].append(len(current_df[(current_df['is_vwc_outlier'] == False) & (current_df['qflag'] == {'G'})]) / len(current_df))
+                self.statistics_data_aurelie["percent_flagit_bad"].append(len(current_df[(current_df['is_vwc_outlier'] == False) & (current_df['qflag'] != {'G'})]) / len(current_df))
+                self.statistics_data_aurelie["percent_human_bad"].append(len(current_df[(current_df['is_vwc_outlier'] == True) & (current_df['qflag'] == {'G'})]) / len(current_df))
+                self.statistics_data_aurelie["percent_both_bad"].append(len(current_df[(current_df['is_vwc_outlier'] == True) & (current_df['qflag'] != {'G'})]) / len(current_df))
+                self.statistics_data_aurelie["number_of_samples"].append(len(current_df))
+            else:
+                continue
+            
+            # percent_both_good = len(current_df[(current_df['is_vwc_outlier'] == False) & (current_df['qflag'] == {'G'})]) / len(current_df)
+            # percent_flagit_bad = len(current_df[(current_df['is_vwc_outlier'] == False) & (current_df['qflag'] != {'G'})]) / len(current_df)
+            # percent_human_bad = len(current_df[(current_df['is_vwc_outlier'] == True) & (current_df['qflag'] == {'G'})]) / len(current_df)
+            # percent_both_bad = len(current_df[(current_df['is_vwc_outlier'] == True) & (current_df['qflag'] != {'G'})]) / len(current_df)
 
             i += 1
 
@@ -213,8 +277,14 @@ class SoilFlagger:
         # percent_human_bad_80 = len(flagit_df_15[(flagit_df_15['is_vwc_outlier'] == True) & (flagit_df_15['qflag'] == {'G'})]) / len(flagit_df_15)
         # percent_both_bad_80 = len(flagit_df_15[(flagit_df_15['is_vwc_outlier'] == True) & (flagit_df_15['qflag'] != {'G'})]) / len(flagit_df_15)
         
-        stat_df = pd.DataFrame(self.statistics_data)
-        stat_df.to_csv("test.csv")
+        stat_both_df = pd.DataFrame(self.statistics_data_both)
+        stat_both_df.to_csv("test_both.csv")
+
+        stat_cara_df = pd.DataFrame(self.statistics_data_cara)
+        stat_cara_df.to_csv("test_cara.csv")
+
+        stat_aurelie_df = pd.DataFrame(self.statistics_data_aurelie)
+        stat_aurelie_df.to_csv("test_aurelie.csv")
     
     def chart_soil_data(self):
         index = 0
